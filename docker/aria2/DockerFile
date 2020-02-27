@@ -2,7 +2,7 @@
 # Dockerfile for aria2
 #
 FROM alpine:latest
-LABEL maintainer="ddxiong0410 <ddxiong0410@gmail.com>"
+LABEL maintainer="ksana410 <ddxiong0410@gmail.com>"
 RUN apk no-cache update && \
     apk add aria2 && \
     apk add wget 
