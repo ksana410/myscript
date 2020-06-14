@@ -7,6 +7,7 @@ Document the growth process
 ---
 
 * **2020/01/04** 初次生成
+* **2020/02/23** 增加了aria2相关内容
 
 ## 目的
 
