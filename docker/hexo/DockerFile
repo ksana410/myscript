@@ -22,6 +22,6 @@ RUN apk add --no-chache nodejs npm git openssh openssh-client && \
 
 EXPOSE 22
 
-WORKDIR /hexo
+VOLUME [ "/hexo","/root/.ssh" ]
 
 CMD ["/usr/sbin/sshd","-D"]
