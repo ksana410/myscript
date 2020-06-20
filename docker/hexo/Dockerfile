@@ -6,7 +6,7 @@ FROM alpine:latest
 LABEL maintainer="ksana410 <ddxiong0410@gmail.com>"
 ENV PROXY=http://172.16.1.10:1081
 
-RUN apk add --no-chache nodejs npm git openssh openssh-client && \
+RUN apk add --no-cache nodejs npm git openssh openssh-client && \
     npm install npm -g && \
     npm install hexo-cli -g && \
     mkdir /hexo && \

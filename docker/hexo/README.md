@@ -1,4 +1,4 @@
-## A docker image for build hexo server
+# A docker image for build hexo server
 
 the Dockerfile can build a image for hexo server
 
