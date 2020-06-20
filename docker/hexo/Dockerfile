@@ -13,8 +13,8 @@ RUN apk add --no-cache nodejs npm git openssh openssh-client && \
     mkdir ~/.ssh && \
     npm config set proxy ${PROXY} && \
     npm config set https-proxy ${PROXY} && \
-    git config --global http_proxy ${PROXY} && \
-    git config --global https_proxy ${PROXY} && \
+    git config --global http.proxy ${PROXY} && \
+    git config --global https.proxy ${PROXY} && \
     echo 'root:password' | chpasswd && \
     echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
     echo 'Port 22' >> /etc/ssh/sshd_config && \
