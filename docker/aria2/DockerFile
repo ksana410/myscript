@@ -10,14 +10,14 @@ ENV SECRET=password
 RUN apk update && \
     apk add aria2 && \
     apk add wget && \
-    rm /var/cache/apk/* && \
+    rm -rf /var/cache/apk/* && \
     mkdir -p /aria2/conf && \
     mkdir /aria2/downloads
 VOLUME [ "/aria2/conf","/aria2/downloads" ]
 
 ADD start.sh /aria2
-ADD aria2.conf /aria2
-ADD dht.dat /aria2
+ADD conf/aria2.conf /aria2/conf
+ADD conf/dht.dat /aria2/conf
 RUN chmod +x /aria2/start.sh
 EXPOSE 6800 6881 6881/udp
 CMD set -xe &&\
