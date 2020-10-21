@@ -1,0 +1,1 @@
+# Nanominer for Docker
