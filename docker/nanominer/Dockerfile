@@ -1,9 +1,9 @@
 FROM debian:latest
 LABEL maintainer="ksana410 <ddxiong0410@gmail.com>"
 
-ENV Wallet=47LyN11A63Ng1PrXMuxWb5GrVaxNDJtjifC8dLx8QAP47rCmMvwLdEMdxp7U9JJrvFCxZA9VWwPY4WuM5DmxVC5859EWATe
+ENV Wallet=4Lx8QAP47rCmMvwLdEMdxp7U9JJrvFCxZA9VWwPY4WuM5DmxVC5859EWATe
 ENV RigName=lll
-ENV Email=zoufeng4@gmail.com
+ENV Email=mail@mail.com
 
 WORKDIR /xmr
 
