@@ -10,7 +10,7 @@ WORKDIR /xmr
 ADD https://github.com/nanopool/nanominer/releases/download/v1.11.0/nanominer-linux-1.11.0.tar.gz /xmr
 RUN tar xzf nanominer-linux-1.11.0.tar.gz \
     && rm ./*.tar.gz \
-    && mv nanominer-linux-1.11 nanominer \
+    && mv nanominer* nanominer \
     && rm -f nanominer/config.ini \
     && chmod +x nanominer/nanominer
 
