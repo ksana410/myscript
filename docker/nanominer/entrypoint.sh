@@ -19,5 +19,8 @@ else
     sed -i "s/Email/${Email}/g" ${XMR_CFG_FILE}
 fi
 
+# show Wallet and RigName ...
+cat ${XMR_CFG_FILE}
+
 # start xmr
 exec /xmr/nanominer/nanominer ${XMR_CFG_FILE}
