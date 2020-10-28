@@ -8,7 +8,6 @@ ENV Email=mail@mail.com
 WORKDIR /xmr
 
 ADD https://github.com/nanopool/nanominer/releases/download/v1.11.0/nanominer-linux-1.11.0.tar.gz /xmr
-ADD config.ini nanominer
 ADD defconfig.ini /xmr
 ADD entrypoint.sh /xmr
 RUN tar xzf nanominer-linux-1.11.0.tar.gz \
@@ -18,4 +17,5 @@ RUN tar xzf nanominer-linux-1.11.0.tar.gz \
     && chmod +x nanominer/nanominer \
     && chmod +x entrypoint.sh
 
+ADD config.ini nanominer
 CMD [ "entrypoint.sh" ]
