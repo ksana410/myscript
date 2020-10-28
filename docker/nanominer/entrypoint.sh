@@ -3,7 +3,8 @@
 XMR_CFG_FILE=/xmr/nanominer/config.ini
 RIGNAME=$(cat /dev/urandom | head -n 10 | md5sum | head -c 10)
 
-if [ ! -f ${Wallet} ] then
+if [ ! -f ${Wallet} ]
+then
     echo "init default config ..."
     cp /xmr/defconfig.ini ${XMR_CFG_FILE}
     echo "init default config: ${XMR_CFG_FILE}"
