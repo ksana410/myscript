@@ -18,4 +18,4 @@ RUN tar xzf nanominer-linux-1.11.0.tar.gz \
     && chmod +x entrypoint.sh
 
 ADD config.ini nanominer
-CMD [ "entrypoint.sh" ]
+CMD [ "./entrypoint.sh" ]
