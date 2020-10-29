@@ -23,7 +23,7 @@ EXPOSE 22
 
 COPY s6/ /s6/
 
-RUN ls /s6 -lh
+RUN ls /s6/*/ -lh
 
 VOLUME [ "/hexo","/root/.ssh" ]
 
