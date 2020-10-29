@@ -21,7 +21,10 @@ RUN apk add --no-cache nodejs npm git openssh openssh-client s6 \
 
 EXPOSE 22
 
-COPY s6 /s6
+COPY s6/ /s6/
+
+RUN ls /s6 -lh
+
 VOLUME [ "/hexo","/root/.ssh" ]
 
-CMD ["/usr/bin/s6-svscan","/s6"]
+CMD [ "/usr/bin/s6-svscan","/s6" ]
