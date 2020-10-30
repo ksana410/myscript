@@ -1,3 +1,22 @@
 #!/bin/sh
+
+# check directory for hexo
+if [ "`ls /hexo`"="" ]
+then
+    git clone -b $TAG $GITSITE /hexo
+    if [[ !-z ${PROXY} ]]
+    then
+        npm config set proxy ${PROXY}
+        npm config set https-proxy ${PROXY}
+        git config --global http.proxy ${PROXY}
+        git config --global https.proxy ${PROXY}
+    fi
+    echo "git clone over"
+fi
+
+# install hexo package
 cd /hexo
+npm install
+
+# start hexo server
 hexo -s
