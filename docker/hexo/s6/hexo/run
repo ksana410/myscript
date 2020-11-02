@@ -3,6 +3,10 @@
 # check directory for hexo
 if [ "`ls /hexo`"="" ]
 then
+    if [[ -z ${TAG} ]]
+    then
+        TAG="master"
+    fi
     git clone -b $TAG $GITSITE /hexo
     if [[ !-z ${PROXY} ]]
     then
