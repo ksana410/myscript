@@ -5,6 +5,7 @@ ENV Wallet=
 ENV RigName=
 ENV Email=
 ARG XMR_VERSION="1.11.0"
+ARG TAG=master
 
 WORKDIR /xmr
 
