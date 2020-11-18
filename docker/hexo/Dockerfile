@@ -7,6 +7,7 @@ LABEL maintainer="ksana410 <ddxiong0410@gmail.com>"
 ENV PROXY=
 ENV PASSWORD=password
 ENV GITSITE=
+ENV TAG=master
 
 RUN apk add --no-cache nodejs npm git openssh openssh-client s6 \
     && npm install npm -g \
