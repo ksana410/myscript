@@ -1,3 +1,4 @@
 #!/bin/sh
-sleep 1
-/usr/bin/ssh -D
+sleep 5
+echo "ssh server restarting..."
+/usr/bin/sshd -D

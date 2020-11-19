@@ -3,7 +3,7 @@
 set -o errexit
 
 # check directory for hexo
-if [ "`ls /hexo`"="" ]
+if [ `ls -A /hexo|wc -w` -eq "0" ]
 then
     git clone -b $TAG $GITSITE /hexo
     if [[ !-z ${PROXY} ]]
