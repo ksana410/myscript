@@ -19,6 +19,3 @@ fi
 # install hexo package
 cd /hexo
 npm install
-
-# start hexo server
-hexo -s
