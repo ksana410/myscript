@@ -9,16 +9,13 @@ ENV PASSWORD=password
 ENV GITSITE=
 ENV TAG=master
 
-RUN apk add --no-cache nodejs npm git openssh openssh-client s6 \
+RUN apk add --no-cache nodejs npm git openssh openssh-client \
     && npm install npm -g \
     && npm install hexo-cli -g \
     && mkdir /hexo \
-    && mkdir ~/.ssh \
-    && mkdir /s6
+    && mkdir ~/.ssh
 
 EXPOSE 22
-
-COPY s6/ /s6/
 
 VOLUME [ "/hexo","/root/.ssh" ]
 

@@ -1,2 +1,0 @@
-#!/bin/sh
-echo "hexo had ready" > /hexo.status

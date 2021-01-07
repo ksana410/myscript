@@ -1,5 +1,22 @@
 #!/bin/sh
 
+# init config
+if [ ! -f "/tmp/sshconfig.tmp" ]
+then
+    echo "init config ..."
+    echo "root:$PASSWORD" | chpasswd
+    echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+    echo 'Port 22' >> /etc/ssh/sshd_config
+    ssh-keygen -A
+    touch /tmp/sshconfig.tmp
+else
+    echo "ssh server will start!"
+fi
+
+# start ssh server
+echo "ssh server starting..."
+/usr/sbin/sshd -D
+
 set -o errexit
 
 # check directory for hexo

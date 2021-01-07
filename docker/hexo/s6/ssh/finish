@@ -1,4 +1,0 @@
-#!/bin/sh
-sleep 2
-echo "ssh server restarting..."
-/usr/bin/sshd -D
