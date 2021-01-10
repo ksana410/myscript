@@ -1,9 +1,13 @@
-# A docker image for build hexo server
+# A docker image for edit hexo website
 
-> the Dockerfile can build a image witch hexo server
+> The Dockerfile can build a ssh server with hexo
 
 ---
 
 ## Version
 
 v0.1
+
+## Base image
+
+apline:latest

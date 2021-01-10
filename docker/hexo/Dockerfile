@@ -1,5 +1,5 @@
 #
-# Dockerfile for Hexo
+# Dockerfile for SSH Server with Hexo
 # 
 
 FROM alpine:latest
@@ -15,7 +15,7 @@ RUN apk add --no-cache nodejs npm git openssh openssh-client \
     && mkdir /hexo \
     && mkdir ~/.ssh
 
-EXPOSE 22
+EXPOSE 2200
 
 VOLUME [ "/hexo","/root/.ssh" ]
 
