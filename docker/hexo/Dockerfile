@@ -15,8 +15,12 @@ RUN apk add --no-cache nodejs npm git openssh openssh-client \
     && mkdir /hexo \
     && mkdir ~/.ssh
 
+ADD start.sh /
+RUN chmod +x /start.sh
+
 EXPOSE 22
 
 VOLUME [ "/hexo","/root/.ssh" ]
 
-CMD [ "/usr/bin/s6-svscan","/s6" ]
+ENTRYPOINT [ "/start.sh" ]
+CMD []
