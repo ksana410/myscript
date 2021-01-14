@@ -3,10 +3,10 @@
 set -o errexit
 
 # check directory for hexo
-if [ `ls -A /hexo|wc -w` -eq "0" ]
+if [[ `ls -A /hexo|wc -w` -eq "0" ]]
 then
     git clone -b $TAG $GITSITE /hexo
-    if [[ !-z ${PROXY} ]]
+    if [[ ! -z ${PROXY} ]]
     then
         npm config set proxy ${PROXY}
         npm config set https-proxy ${PROXY}
@@ -17,11 +17,11 @@ then
 fi
 
 # install hexo package
-cd /hexo
+cd /hexo/data
 npm install
 
 # init config
-if [ ! -f "/tmp/sshconfig.tmp" ]
+if [[ ! -f "/tmp/sshconfig.tmp" ]]
 then
     echo "init config ..."
     echo "root:$PASSWORD" | chpasswd
