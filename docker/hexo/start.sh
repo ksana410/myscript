@@ -6,7 +6,7 @@ set -o errexit
 checkdir() {
     if [[ `ls -A /hexo|wc -w` -eq "0" ]]  #判断hexo目录是否为空
     then
-        git clone -b $TAG $GITSITE /hexo
+        git clone -b $TAG $GITSITE /hexo  #克隆项目至本地目录
     echo "git clone over"
     fi
 }
@@ -38,7 +38,7 @@ initsshconf() {
     if [[ ! -f "/sshconfig.tmp" ]]
     then
         echo "init config ..."
-        echo "root:$PASSWORD" | chpasswd
+        echo "root:$PASSWORD" | chpasswd  #设定ssh密码
         echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
         echo 'Port 22' >> /etc/ssh/sshd_config
         ssh-keygen -A
