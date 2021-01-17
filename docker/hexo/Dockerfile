@@ -15,14 +15,10 @@ RUN apk add --no-cache nodejs npm git openssh openssh-client \
     && mkdir /hexo \
     && mkdir ~/.ssh
 
-<<<<<<< HEAD
-EXPOSE 2200
-=======
 ADD start.sh /
 RUN chmod +x /start.sh
 
 EXPOSE 22
->>>>>>> 75cb150a2c48294dc1092c454576e314158aa484
 
 VOLUME [ "/hexo","/root/.ssh" ]
 
