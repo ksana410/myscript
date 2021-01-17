@@ -50,10 +50,10 @@ initsshconf() {
 
 # start ssh server
 startssh() {
-    checkdir
     if [[ ! -f /setgitnpm.tmp ]]
     then
         setgitnpm
+        checkdir
     elif [[ ! -f /installhexo.tmp ]]
     then
         installhexo
