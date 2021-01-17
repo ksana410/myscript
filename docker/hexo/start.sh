@@ -54,7 +54,8 @@ startssh() {
     then
         setgitnpm
         checkdir
-    elif [[ ! -f /installhexo.tmp ]]
+    fi
+    if [[ ! -f /installhexo.tmp ]]
     then
         installhexo
     fi
