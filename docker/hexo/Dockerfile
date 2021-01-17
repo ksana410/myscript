@@ -8,6 +8,8 @@ ENV PROXY=
 ENV PASSWORD=password
 ENV GITSITE=
 ENV TAG=master
+ENV GITUSER=
+ENV GITEMAIL=
 
 RUN apk add --no-cache nodejs npm git openssh openssh-client \
     && npm install npm -g \
