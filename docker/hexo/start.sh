@@ -7,10 +7,11 @@ checkdir() {
     if [[ `ls -A /hexo|wc -w` -eq "0" ]]  #判断hexo目录是否为空
     then
         git clone -b $TAG $GITSITE /hexo  #克隆项目至本地目录
-    echo "git clone over"
+    echo "Git clone over"
     fi
 }
 
+# config git/npm proxy and user
 setgitnpm() {
     if [[ ! -z ${PROXY} ]]
     then
@@ -18,10 +19,13 @@ setgitnpm() {
         npm config set https-proxy ${PROXY}
         git config --global http.proxy ${PROXY}
         git config --global https.proxy ${PROXY}
-    elif [[ ! -z ${GITUSER} && ! -z ${GITEMAIL} ]]
-    then
-        git config --gloable user.name ${GITUSER}
-        git config --gloable user.email ${GITEMAIL}
+        if [[ ! -z ${GITUSER} && ! -z ${GITEMAIL} ]]
+        then
+            git config --gloable user.name ${GITUSER}
+            git config --gloable user.email ${GITEMAIL}
+        fi
+    else
+        echo "Configuration is complete"
     fi
     touch /setgitnpm.tmp
 }
@@ -44,7 +48,7 @@ initsshconf() {
         ssh-keygen -A
         touch /sshconfig.tmp
     else
-        echo "ssh config is ok!"
+        echo "SSH config is ok!"
     fi
 }
 
@@ -60,7 +64,7 @@ startssh() {
         installhexo
     fi
     initsshconf
-    echo "ssh server starting..."
+    echo "SSH server starting..."
     /usr/sbin/sshd -D
 }
 
