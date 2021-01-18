@@ -21,8 +21,8 @@ setgitnpm() {
         git config --global https.proxy ${PROXY}
         if [[ ! -z ${GITUSER} && ! -z ${GITEMAIL} ]]
         then
-            git config --gloable user.name ${GITUSER}
-            git config --gloable user.email ${GITEMAIL}
+            git config --global user.name ${GITUSER}
+            git config --global user.email ${GITEMAIL}
         fi
     else
         echo "Configuration is complete"
