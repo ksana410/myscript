@@ -15,7 +15,7 @@ apline:latest
 ## Variable Description
 
 |Variables|Default|Description|
-|:--:|:--:|:--|
+|:---|:---:|:---|
 |PORXY||The http proxy|
 |PASSWORD|password|The default ssh password|
 |TAG||git branch|
