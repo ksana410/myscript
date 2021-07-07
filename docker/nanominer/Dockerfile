@@ -4,17 +4,22 @@ LABEL maintainer="ksana410 <ddxiong0410@gmail.com>"
 ENV Wallet=
 ENV RigName=
 ENV Email=
-ARG XMR_VERSION="1.11.0"
+
 
 WORKDIR /xmr
 
-ADD https://github.com/nanopool/nanominer/releases/download/v${XMR_VERSION}/nanominer-linux-${XMR_VERSION}.tar.gz /xmr
+RUN apt-get update \
+    && apt-get install -y wget \
+    && DOWN_URL = wget -qO- -t1 -T2 "https://api.github.com/repos/nanopool/nanominer/releases/latest" |grep browser_download_url |grep linux |grep -v cuda |awk -F " " '{print $2}'
+ADD ${DOWN_URL} /xmr
 ADD defconfig.ini /xmr
 ADD entrypoint.sh /xmr
-RUN tar xzf nanominer-linux-1.11.0.tar.gz \
+RUN tar xzf *.tar.gz \
     && rm ./*.tar.gz \
+    && apt-get autoremove -y wget \
+    && apt-get autoclean \
     && mv nanominer* nanominer \
-    && rm -f nanominer/config.ini \
+    && rm -f nanominer/*.ini \
     && chmod +x nanominer/nanominer \
     && chmod +x entrypoint.sh
 
