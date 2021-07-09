@@ -13,7 +13,7 @@ then
         echo "init default config ..."
         rm ${XMR_CFG_FILE}
         cp /xmr/defconfig.ini ${XMR_CFG_FILE}
-        if [[ -z ${RigName} ]]
+        if [[ ! -z ${RigName} ]]
         then
             sed -i "s/RigName/${RigName}/g" ${XMR_CFG_FILE}
         else
