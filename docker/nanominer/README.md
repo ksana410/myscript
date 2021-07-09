@@ -2,7 +2,7 @@
 
 ## 1.版本
 
-nanominer-v1.11.0
+nanominer-v3.3.7
 
 ## 2.说明
 
