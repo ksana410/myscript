@@ -6,6 +6,7 @@ FROM alpine:latest
 LABEL maintainer="ksana410 <ddxiong0410@gmail.com>"
 ENV PROXY=
 ENV PASSWORD=password
+ENV PUB_KEY=
 ENV GITSITE=
 ENV TAG=master
 ENV GITUSER=
