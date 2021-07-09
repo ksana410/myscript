@@ -6,7 +6,7 @@
 
 ## Version
 
-v0.1
+v0.2
 
 ## Base image
 
@@ -26,3 +26,4 @@ apline:latest
 ## Hostory
 
 * **2021.01.18** First working version
+* **2021.07.09** Trigger test
