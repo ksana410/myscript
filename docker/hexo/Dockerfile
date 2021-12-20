@@ -15,7 +15,7 @@ ENV GITEMAIL=
 RUN apk add --no-cache nodejs npm git openssh openssh-client \
     && npm install npm -g \
     && npm install hexo-cli -g \
-    && mkdir /hexo \
+    && mkdir -r /hexo/data \
     && mkdir ~/.ssh
 
 ADD start.sh /

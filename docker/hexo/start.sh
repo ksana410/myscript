@@ -4,9 +4,9 @@ set -o errexit
 
 # check directory for hexo
 checkdir() {
-    if [[ `ls -A /hexo|wc -w` -eq "0" ]]  #判断hexo目录是否为空
+    if [[ `ls -A /hexo/data|wc -w` -eq "0" ]]  #判断hexo目录是否为空
     then
-        git clone -b ${TAG} ${GITSITE} /hexo  #克隆项目至本地目录
+        git clone -b ${TAG} ${GITSITE} /hexo/data  #克隆项目至本地目录
     echo "Git clone over"
     fi
 }
@@ -27,19 +27,19 @@ setgitnpm() {
     else
         echo "Configuration is complete"
     fi
-    touch /setgitnpm.tmp
+    touch /hexo/setgitnpm.tmp
 }
 # install hexo package
 installhexo() {
-    cd /hexo
+    cd /hexo/data
     npm install
     npm audit fix
-    touch /installhexo.tmp
+    touch /hexo/installhexo.tmp
 }
 
 # init config
 initsshconf() {
-    if [[ ! -f "/sshconfig.tmp" ]]
+    if [[ ! -f "/hexo/sshconfig.tmp" ]]
     then
         echo "init config ..."
         echo "root:${PASSWORD}" | chpasswd  #设定ssh密码
@@ -51,7 +51,7 @@ initsshconf() {
             echo "${PUB_KEY}" >> /root/.ssh/authorized_keys
         fi
         ssh-keygen -A
-        touch /sshconfig.tmp
+        touch /hexo/sshconfig.tmp
     else
         echo "SSH config is ok!"
     fi
@@ -59,12 +59,12 @@ initsshconf() {
 
 # start ssh server
 startssh() {
-    if [[ ! -f /setgitnpm.tmp ]]
+    if [[ ! -f /hexo/setgitnpm.tmp ]]
     then
         setgitnpm
         checkdir
     fi
-    if [[ ! -f /installhexo.tmp ]]
+    if [[ ! -f /hexo/installhexo.tmp ]]
     then
         installhexo
     fi
