@@ -33,7 +33,7 @@ setgitnpm() {
 installhexo() {
     cd /hexo/data
     npm install
-    npm audit fix
+    npm audit fix --force
     touch /hexo/installhexo.tmp
 }
 
