@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -o errexit
+# set -o errexit # Exit on error
 
 # check directory for hexo
 checkdir() {
@@ -35,6 +35,7 @@ installhexo() {
     npm install
     npm audit fix --force
     touch /hexo/installhexo.tmp
+    echo "Install hexo package over"
 }
 
 # init config
