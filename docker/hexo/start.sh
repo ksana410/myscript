@@ -46,12 +46,16 @@ initsshconf() {
         echo "root:${PASSWORD}" | chpasswd  #设定ssh密码
         echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
         echo 'Port 22' >> /etc/ssh/sshd_config
-        if [[ ! -z ${PUB_KEY} ]]
+        if [[ ${PUB_KEY} ]]
         then
+            echo "Add pub key ..."
+            mkdir -p /root/.ssh
+            echo ${PUB_KEY} >> /root/.ssh/authorized_keys
+            chmod 600 /root/.ssh/authorized_keys
             sed -i 's/#PubkeyAuthentication/PubkeyAuthentication/g' /etc/ssh/sshd_config
-            echo "${PUB_KEY}" >> /root/.ssh/authorized_keys
         fi
         ssh-keygen -A
+        ssh-keygen -t rsa -C ${GITEMAIL}
         touch /hexo/sshconfig.tmp
     else
         echo "SSH config is ok!"
@@ -71,6 +75,7 @@ startssh() {
     fi
     initsshconf
     echo "SSH server starting..."
+    cat ~/.ssh/id_rsa.pub | grep ${GITEMAIL}
     /usr/sbin/sshd -D
 }
 
