@@ -17,8 +17,7 @@ setgitnpm() {
     then
         npm config set proxy ${PROXY}
         npm config set https-proxy ${PROXY}
-        git config --global http.proxy ${PROXY}
-        git config --global https.proxy ${PROXY}
+        git config --global http.https://github.com.proxy ${PROXY}
         if [[ ! -z ${GITUSER} && ! -z ${GITEMAIL} ]]
         then
             git config --global user.name ${GITUSER}
@@ -49,7 +48,6 @@ initsshconf() {
         if [[ ${PUB_KEY} ]]
         then
             echo "Add pub key ..."
-            mkdir -p /root/.ssh
             echo ${PUB_KEY} >> /root/.ssh/authorized_keys
             chmod 600 /root/.ssh/authorized_keys
             sed -i 's/#PubkeyAuthentication/PubkeyAuthentication/g' /etc/ssh/sshd_config
