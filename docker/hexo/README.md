@@ -6,7 +6,7 @@
 
 ## Version
 
-v0.2
+v0.3
 
 ## Base image
 
@@ -27,3 +27,4 @@ apline:latest
 
 * **2021.01.18** First working version
 * **2021.07.09** Trigger test
+* **2021.12.21** change directory to /hexo/data
