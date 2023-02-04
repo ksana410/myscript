@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # add default values
 XMR_CFG_FILE=/xmr/nanominer/config.ini
@@ -29,6 +29,13 @@ then
     cat ${XMR_CFG_FILE} > ${RUN_FILE}
 else
     echo "init xmr..."
+fi
+
+# set system proxy
+if [[ ${Proxy} ]]
+then
+    echo "set system proxy"
+    export http_proxy=${Proxy}
 fi
 
 # start xmr

@@ -4,6 +4,7 @@ LABEL maintainer="ksana410 <ddxiong0410@gmail.com>"
 ENV Wallet=
 ENV RigName=
 ENV Email=
+ENV Proxy=
 ARG Github_Url="https://api.github.com/repos/nanopool/nanominer/releases/latest"
 
 
