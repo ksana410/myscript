@@ -1,0 +1,24 @@
+version: '2.4'
+services:
+  shadowsocks:
+    image: shadowsocks/shadowsocks-libev
+    container_name: shadowsocks-raw
+    restart: always
+    network_mode: "host"
+    environment:
+      - SERVER_PORT=3443
+      - SERVER_ADDR=127.0.0.1
+      - LOCAL_ADDR=127.0.0.1
+      - LOCAL_PORT=1080
+      - METHOD=chacha20-ietf-poly1305
+      - PASSWORD=EXAMPLE_PASSWORD_CHANGE_IT
+  shadow-tls:
+    image: ghcr.io/ihciah/shadow-tls:latest
+    restart: always
+    network_mode: "host"
+    environment:
+      - MODE=client
+      - LISTEN=0.0.0.0:3443
+      - SERVER=vps_ip:8443
+      - TLS=cloud.tencent.com
+      - PASSWORD=CHANGE_IT
