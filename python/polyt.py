@@ -482,10 +482,13 @@ cookie = "acw_tc=af061d2716811398332166134ec505da6957561a0ed2b2751b7c857889; cdn
 import requests
 from pprint import pprint
 import urllib.parse
+import time
 
 url = "https://m.polyt.cn/platform-backend/good/search-products-data"
 search_url = "https://m.polyt.cn/platform-backend/good/search-lenovo/"
-order_url = "https://m.polyt.cn/platform-backend/good/shows/"
+check_url = "https://m.polyt.cn/platform-backend/good/shows/"
+seats_url = "https://cdn.polyt.cn/seats/POLY/"
+section_url = "https://m.polyt.cn/platform-backend/good/section/"
 keyword = '白夜行'
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.34',
@@ -500,22 +503,124 @@ headers = {
 # print(res.status_code)
 # pprint(res.text)
 # print(urllib.parse.quote('白夜行'))
-# res = requests.post(url,json={'keyword':'白夜行'},headers=headers) # 查询演出关键字
+#res = requests.post(url,json={'keyword':'如梦之梦'},headers=headers) # 查询演出关键字，之后将获取到的 productId 传递到后续的操作
 # print(res.url)
 # print(res.status_code)
 #print(res.text)
-# pprint(res.json())
-# res = requests.get(search_url + urllib.parse.quote(keyword),headers=headers) # 查询是否存在这个关键字相关的演出，进行初级判断
+#pprint(res.json())
+# res = requests.get(search_url + urllib.parse.quote(keyword),headers=headers) # 查询是否存在这个关键字相关的演出，进行初级删选，之后将获取到的演出关键字传导至后续的操作
 # print(res.status_code)
 # print(res.url)
 # pprint(res.json())
 
-res = requests.get(order_url + '4957400',headers=headers) # 查询所有可选订单
-print(res.status_code)
-pprint(res.json()['data']['showInfoDetailList'])
+#res = requests.get(check_url + '4957400',headers=headers) # 查询所有可选订单
+#print(res.status_code)
+#pprint(res.json()['data']['showInfoDetailList'])
 
 # 选座地址
-seats_url = "https://cdn.polyt.cn/seats/POLY/81403/1680755019930/all_web.json?cb=jsonpCallback"
+#seats_url = "https://cdn.polyt.cn/seats/POLY/81403/1680755019930/all_web.json?cb=jsonpCallback"
 # 请求下述地址将返回可选座位的信息 https://m.polyt.cn/platform-backend/good/seats/4957400/8144500/8140300/available
 
-order_url = "https://m.polyt.cn/platform-backend/order/order" # post uuid
+#order_url = "https://m.polyt.cn/platform-backend/order/order" # post uuid
+
+def aplyt_auto(keyword, city =  '无锡'):
+    session = requests.session()
+    session.headers.update(headers)
+    # 基于输入的关键字进行粗略查找
+    get_productName = session.get(search_url + urllib.parse.quote(keyword))
+    #pprint(get_productName.status_code)
+    #pprint(get_productName.json())
+    if get_productName.json()['success']:
+        # productList = get_productName.json()['data']['show']
+        # print(productList)
+        # if productList:
+        #     #pprint(dict(zip(range(1, len(productList) + 1), productList)))
+        #     #product_Index = int(input('请输入演出编号：')) - 1 
+        #     for product in productList:
+        #         if city in product:
+        #             product_Index = productList.index(product)
+        #             #print(product_Index)
+        # else:
+        #     print('没有找到相关演出')
+        #     exit()
+        get_productId = session.post(url, json = {'keyword': keyword})
+        #pprint(get_productId.json())
+        if get_productId.json()['success']:
+            #print(get_productId.json())
+            product_records = get_productId.json()['data']['records']
+            #productId = get_productId.json()['data']['records'][0]['productId']
+            #pprint(product_records)
+            for record in product_records:
+                if city in record['cityName']:
+                    productId = record['productId']
+                    print(productId)
+                    break
+            if productId:
+                # 查询所有可选的位置
+                get_productDetail = session.get(check_url + productId)
+                #pprint(get_productDetail.json()['data']['showInfoDetailList'])
+                # 基于产品号查找节点号 sectionId，此节点号将用于获取可选座位信息，考虑到演出的场次不同，需要增加一个选择参数，即选择哪个时间点的场次进行操作 
+                DetailList = get_productDetail.json()['data']['showInfoDetailList']
+                showId = DetailList[0]['showId']
+                sectionId = DetailList[0]['sectionId']
+                # url = section_url + showId, 获取到选择地址保存在['data']['showSectionDtos']['webCdnPath'] 中，地址类似于 https://cdn.polyt.cn/seats/POLY/80255/1678154150651/all_web.json
+                # 获取到的单个座位信息：{"b":"","d":"1楼A区1排17座","i":8,"k":0,"n":"","p":424539,"sid":232839437,"t":1,"x":31,"y":7} {"b":"","d":"1楼A区1排32座","i":32,"k":0,"n":"","p":424540,"sid":232839461,"t":1,"x":57,"y":7} {"b":"","d":"1楼A区19排6座","i":677,"k":0,"n":"","p":424541,"sid":232840106,"t":1,"x":42,"y":26}
+                # 可选座位的信息报错在 https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available 地址中，productId 为 4957400，sectionId 为 8029600，showId 为 8033900，
+                pprint(session.get("https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available").json())
+                # 选座请求地址    https://m.polyt.cn/platform-backend/order/lock-seat-choose post中需要携带 {"productId": "4957400", "seatList": ["232839437"],"sectionId": 8029600,"showId": 8033900 } seatList中所包含的是座位的 sid，可多选，响应信息中的data需要记录
+                # https://m.polyt.cn/platform-backend/order/advance/8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975 8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975 对应的就是上述的 data
+                # { 
+                #     "code":"200",
+                #     "data":{
+                #         "categoryId":"1099120000000000004",
+                #         "certificateMaxCountLimit":1,
+                #         "cityCode":"320200",
+                #         "cityName":"无锡市",
+                #         "exchangePoints":null,
+                #         "invoiceNotice":"凭订单信息至前台登记开具",
+                #         "isGiftCard":false,
+                #         "maxViewerNum":1,
+                #         "minViewerNum":1,
+                #         "myPickUpTypeList":null,
+                #         "payWallet":true,
+                #         "pickUpType":"01,02",
+                #         "placeName":"无锡大剧院",
+                #         "productId":"4957400",
+                #         "productImg":"https://cdn.polyt.cn/uploadImg/77457b3a-d71c-4d59-9c6e-b4ddaf8eb37e.webp",
+                #         "productName":"韩雪、刘令飞主演——音乐剧《白夜行》（无锡站2023）",
+                #         "productSourceEnum":"POLY",
+                #         "realNameEnum":"TICKET_ONE_CARD",
+                #         "realNamePricePricelevel":"A,B,C,D,E,F,G,H,J,K,M,N",
+                #         "seat":true,
+                #         "seatInfoList":[
+                #             {
+                #                 "num":1,
+                #                 "price":"1080.0",
+                #                 "pricelevel":"A",
+                #                 "seatName":"歌剧厅1楼A区1排17座"
+                #             }
+                #         ],
+                #         "showBefore":5,
+                #         "showId":8033900,
+                #         "showNameLabel":null,
+                #         "showTime":"2023-06-09 星期五 19:30",
+                #         "theaterId":"1130",
+                #         "thirdCouponId":null
+                #     },
+                #     "errors":null,
+                #     "ext":{},
+                #     "state":"SUCCESS",
+                #     "success":true
+                # }
+                # 订单提交地址 https://m.polyt.cn/platform-backend/order/order post信息 {"deliveryWay": "01","uuid": "8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975", "viewerIdList": ["1645636805202669569"],"consignee": "邹峰","consigneePhone": "13358153869"} 其中 uuid 对应 data viewerIdList 中对应观演人id，可通过https://m.polyt.cn/platform-backend/member/viewers
+                # 获得
+            pprint(get_productId.json()['errors'])
+    else:
+        print(get_productName.json()['errors'])
+
+
+if __name__ == '__main__':
+    # 关键字
+    keyword = '白夜行'
+    # 基于输入的关键字进行粗略查找
+    aplyt_auto(keyword)
