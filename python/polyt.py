@@ -483,13 +483,16 @@ import requests
 from pprint import pprint
 import urllib.parse
 import time
+import json
+import re
 
 url = "https://m.polyt.cn/platform-backend/good/search-products-data"
 search_url = "https://m.polyt.cn/platform-backend/good/search-lenovo/"
 check_url = "https://m.polyt.cn/platform-backend/good/shows/"
 seats_url = "https://cdn.polyt.cn/seats/POLY/"
-section_url = "https://m.polyt.cn/platform-backend/good/section/"
-keyword = '白夜行'
+section_url = "https://m.polyt.cn/platform-backend/good/show/section/"
+available_url = "https://m.polyt.cn/platform-backend/good/seats/"
+price_url = "https://m.polyt.cn/platform-backend/good/show/price/"
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.34',
     'Referer': 'https://m.polyt.cn/',
@@ -560,15 +563,38 @@ def aplyt_auto(keyword, city = '无锡'):
                 get_productDetail = session.get(check_url + productId)
                 #pprint(get_productDetail.json()['data']['showInfoDetailList'])
                 # 基于产品号查找节点号 sectionId，此节点号将用于获取可选座位信息，考虑到演出的场次不同，需要增加一个选择参数，即选择哪个时间点的场次进行操作，演出时间由 showTime 输出，所有场次信息保存在
-                # ['data']['showTimes'] 中，时间戳需要除以1000，场次显示格式 2023.06.09 星期五 19:30，需要注意，有些场次并不是单纯的时间显示
+                # ['data']['showTimes'] 中，时间戳需要除以1000，场次显示格式 2023.06.09 星期五 19:30，需要注意，有些场次并不是单纯的时间显示，showTime 对应 showInfoDetailList 中的 happenTime
+                # 优先进行场次选择，后续再进行价格选择
                 DetailList = get_productDetail.json()['data']['showInfoDetailList']
-                showId = DetailList[0]['showId']
-                sectionId = DetailList[0]['sectionId']
+                pprint(dict(zip(range(len(DetailList)), [j['showTime'] for j in DetailList])))
+                DetailIndex = int(input('请输入演出编号：')) # 需要考虑用户输入的编号是否超出范围
+                start_time = time.time()
+                showId = str(DetailList[DetailIndex]['showId'])
+                sectionId = DetailList[DetailIndex]['sectionId']
+                price_dict = dict(zip([str(int(price['price'])) for price in DetailList[DetailIndex]['ticketPriceList']], [priceId['priceId'] for priceId in DetailList[DetailIndex]['ticketPriceList'] ])) # 建立价位和价格id的索引关系
+                pprint(price_dict)
+                get_seatsUrl = session.get(section_url + showId).json()['data']['showSectionDtos'][0]['webCdnPath']
+                get_seatsInfo = json.loads(re.findall(r"jsonpCallback\((.*?)\)", session.get(get_seatsUrl).text)[0])['data'] # 座位信息列表，配合下面的可选座位列表进行选择
+                seats_status = session.get(available_url + productId + '/' + showId + '/' + sectionId + '/' + 'available').json()['data'] # 可选座位列表，可选的值为1
+                # 基于上述所获取的可选座位信息，建立索引关系
+                seats_available = []
+                for index in range(len(seats_status)):
+                    if seats_status[index] == 1:
+                        seats_available.append(get_seatsInfo[index])
+                seats_dict = {}
+                for item in seats_available:  # 遍历列表，基于价格id建立对应座位的座位id字典，字典中的key为价格id，value为座位id列表
+                    if item['p'] not in seats_dict:
+                        seats_dict[item['p']] = [item['sid']]
+                    else:
+                        seats_dict[item['p']].append(item['sid'])
+                pprint(seats_dict)
+                end_time = time.time()
+                print("执行时间", end_time - start_time)
                 # url = section_url + showId, 获取到选择地址保存在['data']['showSectionDtos']['webCdnPath'] 中，地址类似于 https://cdn.polyt.cn/seats/POLY/80255/1678154150651/all_web.json
                 # 获取到的单个座位信息：{"b":"","d":"1楼A区1排17座","i":8,"k":0,"n":"","p":424539,"sid":232839437,"t":1,"x":31,"y":7} {"b":"","d":"1楼A区1排32座","i":32,"k":0,"n":"","p":424540,"sid":232839461,"t":1,"x":57,"y":7} {"b":"","d":"1楼A区19排6座","i":677,"k":0,"n":"","p":424541,"sid":232840106,"t":1,"x":42,"y":26}
-                # 座位信息中 p 所显示的id 即为 priceId，可以增加一个价位列表，自动购买指定价格范围内的票，亦或是首次执行时先指定价位和场次，然后再执行循环操作
+                # 座位信息中 p 所显示的id 即为 priceId，可以增加一个价位字典，自动购买指定价格范围内的票，亦或是首次执行时先指定价位和场次，然后再执行循环操作
                 # 可选座位的信息报错在 https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available 地址中，productId 为 4957400，sectionId 为 8029600，showId 为 8033900，
-                pprint(session.get("https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available").json())
+                # pprint(session.get("https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available").json())
                 # 选座请求地址 https://m.polyt.cn/platform-backend/order/lock-seat-choose post中需要携带 {"productId": "4957400", "seatList": ["232839437"],"sectionId": 8029600,"showId": 8033900 } seatList中所包含的是座位的 sid，可多选，响应信息中的data需要记录
                 # https://m.polyt.cn/platform-backend/order/advance/8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975 8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975 对应的就是上述的 data
                 # { 
@@ -623,6 +649,7 @@ def aplyt_auto(keyword, city = '无锡'):
 
 if __name__ == '__main__':
     # 关键字
-    keyword = '白夜行'
+    keyword = '阿波罗'
+    city = '厦门'
     # 基于输入的关键字进行粗略查找
     aplyt_auto(keyword)
