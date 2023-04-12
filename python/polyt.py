@@ -483,13 +483,13 @@ import requests
 from pprint import pprint
 import urllib.parse
 import time
+import json
 
 url = "https://m.polyt.cn/platform-backend/good/search-products-data"
 search_url = "https://m.polyt.cn/platform-backend/good/search-lenovo/"
 check_url = "https://m.polyt.cn/platform-backend/good/shows/"
 seats_url = "https://cdn.polyt.cn/seats/POLY/"
 section_url = "https://m.polyt.cn/platform-backend/good/section/"
-keyword = '白夜行'
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.34',
     'Referer': 'https://m.polyt.cn/',
@@ -526,8 +526,12 @@ headers = {
 def aplyt_auto(keyword, city = '无锡'):
     session = requests.session()
     session.headers.update(headers)
-    # 基于输入的关键字进行粗略查找
-    get_productName = session.get(search_url + urllib.parse.quote(keyword))
+    # 基于输入的关键字进行粗略查找，同时这也可以测试网络情况，如果网络不通则退出，后续可以加入循环进行多次重试
+    try:
+        get_productName = session.get(search_url + urllib.parse.quote(keyword))
+    except Exception as e:
+        pprint(e)
+        exit()
     #pprint(get_productName.status_code)
     #pprint(get_productName.json())
     if get_productName.json()['success']:
@@ -556,7 +560,7 @@ def aplyt_auto(keyword, city = '无锡'):
                     print(productId)
                     break
             if productId:
-                # 查询所有可选的位置
+                # 此处可以获得场次时间，座位价格等
                 get_productDetail = session.get(check_url + productId)
                 #pprint(get_productDetail.json()['data']['showInfoDetailList'])
                 # 基于产品号查找节点号 sectionId，此节点号将用于获取可选座位信息，考虑到演出的场次不同，需要增加一个选择参数，即选择哪个时间点的场次进行操作，演出时间由 showTime 输出，所有场次信息保存在
@@ -564,11 +568,14 @@ def aplyt_auto(keyword, city = '无锡'):
                 DetailList = get_productDetail.json()['data']['showInfoDetailList']
                 showId = DetailList[0]['showId']
                 sectionId = DetailList[0]['sectionId']
+                priceList = DetailList[0]['ticketPriceList']
+                priceDict = dict(zip([str(price['price']) for price in priceList], [str(price['priceId']) for price in priceList]))
+                pprint(priceDict)
                 # url = section_url + showId, 获取到选择地址保存在['data']['showSectionDtos']['webCdnPath'] 中，地址类似于 https://cdn.polyt.cn/seats/POLY/80255/1678154150651/all_web.json
                 # 获取到的单个座位信息：{"b":"","d":"1楼A区1排17座","i":8,"k":0,"n":"","p":424539,"sid":232839437,"t":1,"x":31,"y":7} {"b":"","d":"1楼A区1排32座","i":32,"k":0,"n":"","p":424540,"sid":232839461,"t":1,"x":57,"y":7} {"b":"","d":"1楼A区19排6座","i":677,"k":0,"n":"","p":424541,"sid":232840106,"t":1,"x":42,"y":26}
                 # 座位信息中 p 所显示的id 即为 priceId，可以增加一个价位列表，自动购买指定价格范围内的票，亦或是首次执行时先指定价位和场次，然后再执行循环操作
                 # 可选座位的信息报错在 https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available 地址中，productId 为 4957400，sectionId 为 8029600，showId 为 8033900，
-                pprint(session.get("https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available").json())
+                # pprint(session.get("https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available").json())
                 # 选座请求地址 https://m.polyt.cn/platform-backend/order/lock-seat-choose post中需要携带 {"productId": "4957400", "seatList": ["232839437"],"sectionId": 8029600,"showId": 8033900 } seatList中所包含的是座位的 sid，可多选，响应信息中的data需要记录
                 # https://m.polyt.cn/platform-backend/order/advance/8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975 8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975 对应的就是上述的 data
                 # { 
