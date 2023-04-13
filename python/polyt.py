@@ -476,9 +476,6 @@
 #   'venueId': 161,
 #   'venueName': '无锡大剧院歌剧厅'}]
 
-
-cookie = "acw_tc=dde5ca1b16813707133268683e236cd01b1262667ec538c719de55ad0e; cdn_sec_tc=dde5ca1b16813707133268683e236cd01b1262667ec538c719de55ad0e"
-
 import requests
 from pprint import pprint
 import urllib.parse
@@ -497,10 +494,11 @@ lock_url = "https://m.polyt.cn/platform-backend/order/lock-seat-choose"
 order_url = "https://m.polyt.cn/platform-backend/order/order"
 viewers_url = "https://m.polyt.cn/platform-backend/member/viewers"
 discount_url = "https://m.polyt.cn/platform-backend/order/discount-amt"
+cookie = ""
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.34',
     'Referer': 'https://m.polyt.cn/',
-    'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsicmVzMSJdLCJ1c2VyX25hbWUiOiJTTVM6MTMzNTgxNTM4NjkiLCJzY29wZSI6WyJhbGwiXSwiZXhwIjoxNjgxNzQxMTMxLCJhdXRob3JpdGllcyI6WyJVc2VyIl0sImp0aSI6IjI4ZDM3MzkzLWZhNjgtNGU4ZC1iNzJkLWVjNzdmNmU0OGI5ZCIsImNsaWVudF9pZCI6InBsYXRfaDUiLCJpbmZvIjp7InVzZXJJZCI6Ijg1MjE5NDc1MTU2MjA4ODQ0OCIsInVzZXJuYW1lIjoiMTMzNTgxNTM4NjkiLCJuaWNrTmFtZSI6bnVsbCwicGhvbmUiOiIxMzM1ODE1Mzg2OSIsImhlYWRJbWciOm51bGwsImlkQ2FyZEFwcHJvdmUiOiIwMiIsImNlcnROdW1iZXIiOm51bGx9fQ.3DtfOBAIZNrMrTjghcOq6_cZlwMHGV0Xg247Qw41L0w',
+    'Authorization': '',
     'Content-Type': 'application/json',
     'Channel': 'plat_h5',
     'Connection': 'keep-alive',
