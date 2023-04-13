@@ -477,7 +477,7 @@
 #   'venueName': '无锡大剧院歌剧厅'}]
 
 
-cookie = "acw_tc=af061d2716811398332166134ec505da6957561a0ed2b2751b7c857889; cdn_sec_tc=af061d2716811398332166134ec505da6957561a0ed2b2751b7c857889; ssxmod_itna=YqUO7K40x+ENGHD87iK0IKw3pqNitiHbD07x05qi=iDSxGKidDqxBemjmRgig0fb3YG37eKGlEb7oa3UCDPAdGi1Dq3GHSxx0aDbqGk5K7g4eDxOq0rD74irDDxD3AxneD+D0blMBwqGWDeKDmxiODlF7x4DF264N2gutDQPDiP5zsxGCK407DiyxB2Dq2xG1DQ5Ds6Rfpe5D02fLp05zwF3DEGR8Y+YDvxDkKK5DoPIvDB41/Edesmpeinw4ij+3HEDYICDoiB=xYZeOTN0PqjZxGA036W2o0koqpWrEFYD; ssxmod_itna2=YqUO7K40x+ENGHD87iK0IKw3pqNitiHbD0Dn9OroDsb3GDL0W4tQTC1cRYHKLGaX7V4tjYLxDfh7QiopnmDLqViUjO04OTzqgrv4ZPM+iIVAoliQD6jUlI9Q4dwZlGcXuSbMkxgk5ioovGu1PHu=0PyQ0bjlubyC2TVCiWWlYOuYrIqQyx3cRNxfWIVBrIx9To5mSCZQiiw/f=EbioeeT4eWSjyl4dxRI5LrQvfUO0zPqIUoa0QE5klgH0g+ekgFZnNv1QyleyVQp1KKFgS3A1QKqg2=HBQA6SqPaijcByfXaWQWS0rhNmTo3DY6u8o8tph=GG8LgznBKtBGpd8PCqxwxRkKR7hqgqtoxIGPRAGpRzh2N5e=Yg5RGbu7tThphx=9dTn7puA8XbNLEm4oI4SKgSobld2GoRbTunGdaEOj1vwoD17op+QxfCMIjo8fwoNjd6gFrODci4vCQNr4lg5pg4u2kNxURxfMitPQY3gKBdjbYH9xA5AGZ1AgoHT2jc6iL2tVmPQx1xo3b/eD7QimwbEr1rDOArCxeBC3PYr8WiiD4t2gH7SbCrPomsAeijKiH0diGaN58kMTMmaNUbnX8C2hNDhYuhNw+5TwWmiqS/gX1qmATw/OoOLdP7CkBepWZxM1HqGcDG7piDD="
+cookie = "acw_tc=dde5ca1b16813707133268683e236cd01b1262667ec538c719de55ad0e; cdn_sec_tc=dde5ca1b16813707133268683e236cd01b1262667ec538c719de55ad0e"
 
 import requests
 from pprint import pprint
@@ -493,6 +493,9 @@ seats_url = "https://cdn.polyt.cn/seats/POLY/"
 section_url = "https://m.polyt.cn/platform-backend/good/show/section/"
 available_url = "https://m.polyt.cn/platform-backend/good/seats/"
 price_url = "https://m.polyt.cn/platform-backend/good/show/price/"
+lock_url = "https://m.polyt.cn/platform-backend/order/lock-seat-choose"
+order_url = "https://m.polyt.cn/platform-backend/order/order"
+viewers_url = "https://m.polyt.cn/platform-backend/member/viewers"
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.34',
     'Referer': 'https://m.polyt.cn/',
@@ -572,11 +575,9 @@ def aplyt_auto(keyword, city = '无锡'):
                 DetailList = get_productDetail.json()['data']['showInfoDetailList']
                 pprint(dict(zip(range(len(DetailList)), [j['showTime'] for j in DetailList])))
                 DetailIndex = int(input('请输入演出编号：')) # 需要考虑用户输入的编号是否超出范围
-                start_time = time.time()
                 showId = str(DetailList[DetailIndex]['showId'])
                 sectionId = DetailList[DetailIndex]['sectionId']
-                price_dict = dict(zip([str(int(price['price'])) for price in DetailList[DetailIndex]['ticketPriceList']], [priceId['priceId'] for priceId in DetailList[DetailIndex]['ticketPriceList'] ])) # 建立价位和价格id的索引关系
-                pprint(price_dict)
+                price_dict = dict(zip([str(int(price['price'])) for price in DetailList[DetailIndex]['ticketPriceList'] if price['reservedCount'] != 0], [str(priceId['priceId']) for priceId in DetailList[DetailIndex]['ticketPriceList'] ])) # 建立价位和价格id的索引关系
                 get_seatsUrl = session.get(section_url + showId).json()['data']['showSectionDtos'][0]['webCdnPath']
                 get_seatsInfo = json.loads(re.findall(r"jsonpCallback\((.*?)\)", session.get(get_seatsUrl).text)[0])['data'] # 座位信息列表，配合下面的可选座位列表进行选择
                 seats_status = session.get(available_url + productId + '/' + showId + '/' + sectionId + '/' + 'available').json()['data'] # 可选座位列表，可选的值为1
@@ -587,13 +588,26 @@ def aplyt_auto(keyword, city = '无锡'):
                         seats_available.append(get_seatsInfo[index])
                 seats_dict = {}
                 for item in seats_available:  # 遍历列表，基于价格id建立对应座位的座位id字典，字典中的key为价格id，value为座位id列表
-                    if item['p'] not in seats_dict:
-                        seats_dict[item['p']] = [item['sid']]
+                    if str(item['p']) not in seats_dict:
+                        seats_dict[str(item['p'])] = [str(item['sid'])]
                     else:
-                        seats_dict[item['p']].append(item['sid'])
-                pprint(seats_dict)
-                end_time = time.time()
-                print("执行时间", end_time - start_time)
+                        seats_dict[str(item['p'])].append(str(item['sid']))
+                price_list = [key for key in price_dict.keys()]
+                while 1:
+                    price_sel = input(f"在如下价格中选择你需要的价位{price_list}：")
+                    if price_sel in price_list:
+                        break
+                    else:
+                        print(f"找不到价格为{price_sel}的票，请重试！")
+                # 基于用户所选的价位选择对应的座位id列表，一般情况下列表数值越小，座位越好，一般取前面几个作为候选
+                price_id = price_dict[price_sel]
+                # 需要注意所选的价格是否还有座位，如果没有，则不能选择
+                seatId_selList = [str(i) for i in seats_dict[price_id][0:2]]
+                lock_seats = session.post(lock_url, json={'productId': productId, 'showId': showId, 'sectionId': sectionId, 'seatList': seatId_selList}).json()
+                uuid = lock_seats['data']
+                get_id = session.get(viewers_url).json()['data']
+                viewerIdList = [ viewer['id'] for viewer in get_id if viewer['credentialsCode'] in code_list]
+                
                 # url = section_url + showId, 获取到选择地址保存在['data']['showSectionDtos']['webCdnPath'] 中，地址类似于 https://cdn.polyt.cn/seats/POLY/80255/1678154150651/all_web.json
                 # 获取到的单个座位信息：{"b":"","d":"1楼A区1排17座","i":8,"k":0,"n":"","p":424539,"sid":232839437,"t":1,"x":31,"y":7} {"b":"","d":"1楼A区1排32座","i":32,"k":0,"n":"","p":424540,"sid":232839461,"t":1,"x":57,"y":7} {"b":"","d":"1楼A区19排6座","i":677,"k":0,"n":"","p":424541,"sid":232840106,"t":1,"x":42,"y":26}
                 # 座位信息中 p 所显示的id 即为 priceId，可以增加一个价位字典，自动购买指定价格范围内的票，亦或是首次执行时先指定价位和场次，然后再执行循环操作
@@ -601,6 +615,11 @@ def aplyt_auto(keyword, city = '无锡'):
                 # pprint(session.get("https://m.polyt.cn/platform-backend/good/seats/4957400/8033900/8029600/available").json())
                 # 选座请求地址 https://m.polyt.cn/platform-backend/order/lock-seat-choose post中需要携带 {"productId": "4957400", "seatList": ["232839437"],"sectionId": 8029600,"showId": 8033900 } seatList中所包含的是座位的 sid，可多选，响应信息中的data需要记录
                 # https://m.polyt.cn/platform-backend/order/advance/8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975 8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975 对应的就是上述的 data
+                # 订单请求 post 中需要携带 { "deliveryWay": "01", "uuid": "6e479227-cd7e-4950-88f4-9f035d6b517c", "viewerIdList": [ "1645636805202669569" ], "consignee": "邹峰", "consigneePhone": "13358153869"}，
+                # 请求地址 https://m.polyt.cn/platform-backend/order/order ，consignee 和 consigneePhone 必填，手动指定接受人和手机号即可，viewerIdList 中的id 在https://m.polyt.cn/platform-backend/member/viewers
+                # 请求['data']获得，建议身份证号进行筛选，基于credentialsCode，获得用户的id
+                # 手动添加观演用户使用如下地址 https://m.polyt.cn/platform-backend/member/viewer，post {"credentialsCode": "320281199705143779", "cardTypeEnum": "ID_CERT","name": "张亮", "id": "", "top": 0}，
+                # 按照格式添加即可
                 # { 
                 #     "code":"200",
                 #     "data":{
@@ -646,7 +665,6 @@ def aplyt_auto(keyword, city = '无锡'):
                 # }
                 # 订单提交地址 https://m.polyt.cn/platform-backend/order/order post信息 {"deliveryWay": "01","uuid": "8a7a2575-0fa0-4ec1-b638-9e2ff9fa1975", "viewerIdList": ["1645636805202669569"],"consignee": "邹峰","consigneePhone": "13358153869"} 其中 uuid 对应 data viewerIdList 中对应观演人id，可通过https://m.polyt.cn/platform-backend/member/viewers
                 # 获得
-            pprint(get_productId.json()['errors'])
     else:
         print(get_productName.json()['errors'])
 
