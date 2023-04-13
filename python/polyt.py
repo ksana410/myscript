@@ -602,12 +602,20 @@ def aplyt_auto(keyword, city = '无锡'):
                 # 基于用户所选的价位选择对应的座位id列表，一般情况下列表数值越小，座位越好，一般取前面几个作为候选
                 price_id = price_dict[price_sel]
                 # 需要注意所选的价格是否还有座位，如果没有，则不能选择
-                seatId_selList = [str(i) for i in seats_dict[price_id][0:2]]
+                seatId_selList = [str(i) for i in seats_dict[price_id][0:3]]
                 lock_seats = session.post(lock_url, json={'productId': productId, 'showId': showId, 'sectionId': sectionId, 'seatList': seatId_selList}).json()
                 uuid = lock_seats['data']
                 get_id = session.get(viewers_url).json()['data']
-                viewerIdList = [ viewer['id'] for viewer in get_id if viewer['credentialsCode'] in code_list]
                 
+                viewerIdList = [ viewer['id'] for viewer in get_id ]
+                name = "邹峰"
+                phone_number = "13915303588"
+                submit_order = session.post(order_url, json = {"deliveryWay": "01", "uuid": uuid, "viewerIdList": viewerIdList, "consignee": name, "consigneePhone": phone_number}).json()
+                if submit_order['success']:
+                    print("订单已提交，请及时支付以免失效！")
+                else:
+                    print("失败")
+                    print(submit_order)
                 # url = section_url + showId, 获取到选择地址保存在['data']['showSectionDtos']['webCdnPath'] 中，地址类似于 https://cdn.polyt.cn/seats/POLY/80255/1678154150651/all_web.json
                 # 获取到的单个座位信息：{"b":"","d":"1楼A区1排17座","i":8,"k":0,"n":"","p":424539,"sid":232839437,"t":1,"x":31,"y":7} {"b":"","d":"1楼A区1排32座","i":32,"k":0,"n":"","p":424540,"sid":232839461,"t":1,"x":57,"y":7} {"b":"","d":"1楼A区19排6座","i":677,"k":0,"n":"","p":424541,"sid":232840106,"t":1,"x":42,"y":26}
                 # 座位信息中 p 所显示的id 即为 priceId，可以增加一个价位字典，自动购买指定价格范围内的票，亦或是首次执行时先指定价位和场次，然后再执行循环操作
