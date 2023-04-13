@@ -496,6 +496,7 @@ price_url = "https://m.polyt.cn/platform-backend/good/show/price/"
 lock_url = "https://m.polyt.cn/platform-backend/order/lock-seat-choose"
 order_url = "https://m.polyt.cn/platform-backend/order/order"
 viewers_url = "https://m.polyt.cn/platform-backend/member/viewers"
+discount_url = "https://m.polyt.cn/platform-backend/order/discount-amt"
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.34',
     'Referer': 'https://m.polyt.cn/',
@@ -578,7 +579,9 @@ def aplyt_auto(keyword, city = '无锡'):
                 showId = str(DetailList[DetailIndex]['showId'])
                 sectionId = DetailList[DetailIndex]['sectionId']
                 price_dict = dict(zip([str(int(price['price'])) for price in DetailList[DetailIndex]['ticketPriceList'] if price['reservedCount'] != 0], [str(priceId['priceId']) for priceId in DetailList[DetailIndex]['ticketPriceList'] ])) # 建立价位和价格id的索引关系
-                get_seatsUrl = session.get(section_url + showId).json()['data']['showSectionDtos'][0]['webCdnPath']
+                get_section = session.get(section_url + showId).json()
+                get_seatsUrl = get_section['data']['showSectionDtos'][0]['webCdnPath']
+                # categoryId = get_section['data']['categoryId']
                 get_seatsInfo = json.loads(re.findall(r"jsonpCallback\((.*?)\)", session.get(get_seatsUrl).text)[0])['data'] # 座位信息列表，配合下面的可选座位列表进行选择
                 seats_status = session.get(available_url + productId + '/' + showId + '/' + sectionId + '/' + 'available').json()['data'] # 可选座位列表，可选的值为1
                 # 基于上述所获取的可选座位信息，建立索引关系
@@ -605,11 +608,15 @@ def aplyt_auto(keyword, city = '无锡'):
                 seatId_selList = [str(i) for i in seats_dict[price_id][0:3]]
                 lock_seats = session.post(lock_url, json={'productId': productId, 'showId': showId, 'sectionId': sectionId, 'seatList': seatId_selList}).json()
                 uuid = lock_seats['data']
+                # 获取折扣信息，此为必选项，必须将所选座位的uuid提交至系统才能在后续订单提交的过程中获得响应
+                get_discount = session.post(discount_url, json = {'uuid': uuid})
+                # discountAmt = get_discount.json()['data']['discountAmt']
+                # 获取所有观演人对应的身份信息id，这个主要用于实名制
                 get_id = session.get(viewers_url).json()['data']
-                
                 viewerIdList = [ viewer['id'] for viewer in get_id ]
                 name = "邹峰"
                 phone_number = "13915303588"
+                # make_explain = session.post("https://m.polyt.cn/platform-backend/member/integral/explain", json = {'actuallyPrice': int(discountAmt), 'showId': showId})
                 submit_order = session.post(order_url, json = {"deliveryWay": "01", "uuid": uuid, "viewerIdList": viewerIdList, "consignee": name, "consigneePhone": phone_number}).json()
                 if submit_order['success']:
                     print("订单已提交，请及时支付以免失效！")
@@ -627,6 +634,7 @@ def aplyt_auto(keyword, city = '无锡'):
                 # 请求地址 https://m.polyt.cn/platform-backend/order/order ，consignee 和 consigneePhone 必填，手动指定接受人和手机号即可，viewerIdList 中的id 在https://m.polyt.cn/platform-backend/member/viewers
                 # 请求['data']获得，建议身份证号进行筛选，基于credentialsCode，获得用户的id
                 # 手动添加观演用户使用如下地址 https://m.polyt.cn/platform-backend/member/viewer，post {"credentialsCode": "320281199705143779", "cardTypeEnum": "ID_CERT","name": "张亮", "id": "", "top": 0}，
+                # 删除观演人使用 DELETE https://m.polyt.cn/platform-backend/member/view/1646433646266707970, 对应观演人id即可
                 # 按照格式添加即可
                 # { 
                 #     "code":"200",
@@ -683,3 +691,16 @@ if __name__ == '__main__':
     city = '厦门'
     # 基于输入的关键字进行粗略查找
     aplyt_auto(keyword)
+
+# 对象化编程
+# 执行流程如下
+# 1. 要求用户输入演出名，所处城市，工具会基于上述两个输入确定具体的演出项目
+# 2. 脚本应具有两种模式，抢购模式，普通模式，抢购模式只需要确认演出名，城市，观演人即可，默认每场都抢购
+# 3. 此时对象自动将获取到的演出时间，票价，观演人, 此时可以添加观演人，最终存储用户所选，需要注意，由于实名制的要求，购票数量对应观演人数量，故指定观演人即可
+# 4. 之后软件将自动运行，直到抢购到为止
+class polytAuto: 
+    def __init__(self, keyword: str, city: str):
+        self.keyword = keyword
+        self.city = city
+        self.url = 'https://m.polyt.cn/platform-backend/good/seats/'
+        self.url2 = 'https://m.polyt.cn/platform-backend/order/lock-seat-choose'
