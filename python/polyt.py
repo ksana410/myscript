@@ -484,22 +484,15 @@ from pprint import pprint
 import urllib.parse
 import time
 import json
-<<<<<<< HEAD
-=======
 import re
->>>>>>> 4348b22c603467d3dd71c3855a239f2d5e704432
 
 url = "https://m.polyt.cn/platform-backend/good/search-products-data"
 search_url = "https://m.polyt.cn/platform-backend/good/search-lenovo/"
 check_url = "https://m.polyt.cn/platform-backend/good/shows/"
 seats_url = "https://cdn.polyt.cn/seats/POLY/"
-<<<<<<< HEAD
-section_url = "https://m.polyt.cn/platform-backend/good/section/"
-=======
 section_url = "https://m.polyt.cn/platform-backend/good/show/section/"
 available_url = "https://m.polyt.cn/platform-backend/good/seats/"
 price_url = "https://m.polyt.cn/platform-backend/good/show/price/"
->>>>>>> 4348b22c603467d3dd71c3855a239f2d5e704432
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Edg/112.0.1722.34',
     'Referer': 'https://m.polyt.cn/',
