@@ -19,7 +19,6 @@ header = {
     'Connection': 'keep-alive',
     'Cookie': cookie
 }
-session = requests.Session()
 
 # 对象化编程
 # 执行流程如下
@@ -32,7 +31,8 @@ class polytAuto:
         self.keyword = keyword
         self.city = city
         self.url = 'https://m.polyt.cn/platform-backend/'
-        self.session = session.headers.update(header)
+        self.session = requests.session()
+        self.session.headers.update(header)
         
     # 建立get操作，如果失败则重试三次，三次重试失败后终止函数
     def _get(self, url: str):
@@ -52,9 +52,9 @@ class polytAuto:
     
     # 建立post操作，三次请求失败则退出程序
     def _post(self, url: str, json_data: dict):
-        retry_count = 1
+        retry_count = 3
         try:
-            response = self.session.post(url, json = data)
+            response = self.session.post(url, json = json_data)
             response.raise_for_status()
             return response.json()
         except Exception as e:
@@ -67,17 +67,17 @@ class polytAuto:
                 exit()
     
     # 建立delete操作，三次重试失败即退出
-    def _delete(self, url: str, josn_data: dict):
+    def _delete(self, url: str, json_data: dict):
         retry_count = 3
         try:
-            response = self.session.delete(url, josn = data)
+            response = self.session.delete(url, josn = json_data)
             response.raise_for_status()
             return response.json()
         except Exception as e:
             print(e)
             if retry_count > 0:
                 retry_count -= 1
-                return self._delete(url, josn_data)
+                return self._delete(url, json_data)
             else:
                 print("重试失败，程序终止！")
                 exit()
@@ -91,7 +91,7 @@ class polytAuto:
         data = self._post(self.url + 'good/search-products-data', {'keyword': self.keyword})
         if data['success']:
             records = data['data']['records']
-            for records in records:
+            for record in records:
                 if self.city in record['cityName']:
                     productId = record['productId']
                     break
@@ -101,4 +101,4 @@ class polytAuto:
                 
 if __name__ == '__main__':
     start = polytAuto("白夜行", "无锡")
-    start.get_time_price()
+    print(start.get_time_price())
