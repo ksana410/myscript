@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # polyt 平台自动购买工具
 # 输入所需购买的演出项目名，自动购买添加到用户的订单中
 # 查询响应
@@ -486,7 +488,6 @@ import re
 url = "https://m.polyt.cn/platform-backend/good/search-products-data"
 search_url = "https://m.polyt.cn/platform-backend/good/search-lenovo/"
 check_url = "https://m.polyt.cn/platform-backend/good/shows/"
-seats_url = "https://cdn.polyt.cn/seats/POLY/"
 section_url = "https://m.polyt.cn/platform-backend/good/show/section/"
 available_url = "https://m.polyt.cn/platform-backend/good/seats/"
 price_url = "https://m.polyt.cn/platform-backend/good/show/price/"
@@ -504,29 +505,6 @@ headers = {
     'Connection': 'keep-alive',
     'Cookie': cookie
 }
-# res = requests.get(url)
-# print(res.status_code)
-# pprint(res.text)
-# print(urllib.parse.quote('白夜行'))
-#res = requests.post(url,json={'keyword':'如梦之梦'},headers=headers) # 查询演出关键字，之后将获取到的 productId 传递到后续的操作
-# print(res.url)
-# print(res.status_code)
-#print(res.text)
-#pprint(res.json())
-# res = requests.get(search_url + urllib.parse.quote(keyword),headers=headers) # 查询是否存在这个关键字相关的演出，进行初级删选，之后将获取到的演出关键字传导至后续的操作
-# print(res.status_code)
-# print(res.url)
-# pprint(res.json())
-
-#res = requests.get(check_url + '4957400',headers=headers) # 查询所有可选订单
-#print(res.status_code)
-#pprint(res.json()['data']['showInfoDetailList'])
-
-# 选座地址
-#seats_url = "https://cdn.polyt.cn/seats/POLY/81403/1680755019930/all_web.json?cb=jsonpCallback"
-# 请求下述地址将返回可选座位的信息 https://m.polyt.cn/platform-backend/good/seats/4957400/8144500/8140300/available
-
-#order_url = "https://m.polyt.cn/platform-backend/order/order" # post uuid
 
 def aplyt_auto(keyword, city = '无锡'):
     session = requests.session()
@@ -540,18 +518,6 @@ def aplyt_auto(keyword, city = '无锡'):
     #pprint(get_productName.status_code)
     #pprint(get_productName.json())
     if get_productName.json()['success']:
-        # productList = get_productName.json()['data']['show']
-        # print(productList)
-        # if productList:
-        #     #pprint(dict(zip(range(1, len(productList) + 1), productList)))
-        #     #product_Index = int(input('请输入演出编号：')) - 1 
-        #     for product in productList:
-        #         if city in product:
-        #             product_Index = productList.index(product)
-        #             #print(product_Index)
-        # else:
-        #     print('没有找到相关演出')
-        #     exit()
         get_productId = session.post(url, json = {'keyword': keyword})
         #pprint(get_productId.json())
         if get_productId.json()['success']:
@@ -689,16 +655,6 @@ if __name__ == '__main__':
     city = '厦门'
     # 基于输入的关键字进行粗略查找
     aplyt_auto(keyword)
-
-# 对象化编程
-# 执行流程如下
-# 1. 要求用户输入演出名，所处城市，工具会基于上述两个输入确定具体的演出项目
-# 2. 脚本应具有两种模式，抢购模式，普通模式，抢购模式只需要确认演出名，城市，观演人即可，默认每场都抢购
-# 3. 此时对象自动将获取到的演出时间，票价，观演人, 此时可以添加观演人，最终存储用户所选，需要注意，由于实名制的要求，购票数量对应观演人数量，故指定观演人即可
-# 4. 之后软件将自动运行，直到抢购到为止
-class polytAuto: 
-    def __init__(self, keyword: str, city: str):
-        self.keyword = keyword
-        self.city = city
-        self.url = 'https://m.polyt.cn/platform-backend/good/seats/'
-        self.url2 = 'https://m.polyt.cn/platform-backend/order/lock-seat-choose'
+    
+    
+    
