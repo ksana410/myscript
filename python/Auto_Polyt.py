@@ -96,9 +96,13 @@ class polytAuto:
                     productId = record['productId']
                     break
             if productId:
-                return productId
+                productDetail = self._get(self.url + 'good/shows/' + productId)
+                DetailList = productDetail['data']['showInfoDetailList']
     
-                
+    # 管理观演人信息，增加，选择或者删除
+    def manage_viewers(self, name, credentialsCode, operate = 'select'):
+        pass
+
 if __name__ == '__main__':
     start = polytAuto("白夜行", "无锡")
     print(start.get_time_price())
