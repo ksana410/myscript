@@ -74,7 +74,7 @@ class polytAuto:
     def _delete(self, url: str, json_data: dict):
         retry_count = 3
         try:
-            response = self.session.delete(url, josn = json_data)
+            response = self.session.delete(url, json = json_data)
             response.raise_for_status()
             return response.json()
         except Exception as e:
@@ -95,6 +95,7 @@ class polytAuto:
         data = self._post(self.url + 'good/search-products-data', {'keyword': self.keyword})
         if data['success']:
             records = data['data']['records']
+            productId = None
             for record in records:
                 if self.city in record['cityName']:
                     productId = record['productId']
@@ -110,9 +111,9 @@ class polytAuto:
         viewers_dict = dict(zip(range(len(viewers_list)), [ i['name'] for i in viewers_list]))
         if operate == 'select':
             pprint(viewers_dict)
-            viewers_index = input(f'请输入要选择的观演人编号，结束请直接回车：{list(viewers_dict.keys())}')
-            if viewers_index in viewers_dict.keys():
-                pass
+            # 选择观演人，逐个选择，直到按下回车结束，如果输入的序号不存在，则输出重试信息
+            while 1:
+
         
     # 使用短信验证码进行登录，需要绕过 cf.aliyun.com 的滑动验证码
     def login(self, phone):
