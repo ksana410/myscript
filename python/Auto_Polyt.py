@@ -40,7 +40,11 @@ class polytAuto:
         try:
             response = self.session.get(url)
             response.raise_for_status()
-            return response.json()
+            if response.json()['success']:
+                return response.json()
+            else:
+                print(response.json()['errors'])
+                return None
         except Exception as e:
             print(e)
             if retry_count > 0:
@@ -98,11 +102,23 @@ class polytAuto:
             if productId:
                 productDetail = self._get(self.url + 'good/shows/' + productId)
                 DetailList = productDetail['data']['showInfoDetailList']
+                pprint(DetailList)
     
     # 管理观演人信息，增加，选择或者删除
-    def manage_viewers(self, name, credentialsCode, operate = 'select'):
+    def manage_viewers(self, operate = 'select'):
+        viewers_list = self._get(self.url + 'member/viewers')['data']
+        viewers_dict = dict(zip(range(len(viewers_list)), [ i['name'] for i in viewers_list]))
+        if operate == 'select':
+            pprint(viewers_dict)
+            viewers_index = input(f'请输入要选择的观演人编号，结束请直接回车：{list(viewers_dict.keys())}')
+            if viewers_index in viewers_dict.keys():
+                pass
+        
+    # 使用短信验证码进行登录，需要绕过 cf.aliyun.com 的滑动验证码
+    def login(self, phone):
         pass
 
 if __name__ == '__main__':
     start = polytAuto("白夜行", "无锡")
-    print(start.get_time_price())
+    pprint(start.get_time_price())
+    pprint(start.manage_viewers())
