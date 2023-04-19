@@ -111,7 +111,7 @@ class polytAuto:
                 pprint(DetailList)
     
     # 管理观演人信息，增加，选择或者删除
-    def manage_viewers(self, operate = 'select'):
+    def manage_viewers(self, operate = 'list'):
         viewers_list = self._get(self.url + 'member/viewers')['data']
         viewers_dict = dict(zip([str(i) for i in range(len(viewers_list))], [ i['name'] for i in viewers_list]))
         if operate == 'select':
@@ -136,20 +136,29 @@ class polytAuto:
                 else:
                     break
             return [viewers_list[int(index)]['id'] for index in viewers_selected]
+        # 添加观演人的操作，基于身份证号码进行匹配，如果从未添加过就添加进去
         elif operate == 'add':
-            id = upper(input('请输入观演人身份证号：'))
+            id = (input('请输入观演人身份证号：')).upper()
+            # 身份证正则匹配，特意按照日期格式进行了匹配优化
             if re.match(r'[1-9]/d{5}[12][09][0-9]{2}[12][0-9]{3}[01][0-9][03]/d{4}[0-9X]', id):
                 for viewer in viewers_list:
                     if viewer['credentialsCode'] == id:
                         print(f'{viewer["name"]}已被添加')
                         return
                 name = input('请输入观演人姓名：')
-                add_viewer = self._post(self.url + 'member/viewers', json = {"credentialsCode": id, "cardTypeEnum": "ID_CERT","name": name, "id": "", "top": 0})
+                add_viewer = self._post(self.url + 'member/viewers', {"credentialsCode": id, "cardTypeEnum": "ID_CERT","name": name, "id": "", "top": 0})
                 if add_viewer['success']:
                     print(f'{name}已添加')
             else:
                 print('身份证号格式错误')
                 self.manage_viewers('add')
+        # 删除观演人，选择删除
+        elif operate == 'delete':
+            pprint(viewers_dict)
+            viewers_selected = self.manage_viewers('select')
+            pass
+        else:
+            return [ (i['name'],i['credentialsCode']) for i in viewers_list ]
         
     # 使用短信验证码进行登录，需要绕过 cf.aliyun.com 的滑动验证码
     def login(self, phone):
