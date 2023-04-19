@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
+# 基于协程来运行程序
+
 import requests
 from pprint import pprint
 import time
 import json
 import re
 import userdata
+import asyncio
 
 
 cookie = userdata.cookie
@@ -109,6 +112,10 @@ class polytAuto:
                 productDetail = self._get(self.url + 'good/shows/' + productId)
                 DetailList = productDetail['data']['showInfoDetailList']
                 pprint(DetailList)
+
+    # 选定演出的场次和票价
+    def select_time_price(self):
+        pass
     
     # 管理观演人信息，增加，选择或者删除
     def manage_viewers(self, operate = 'list'):
@@ -162,6 +169,10 @@ class polytAuto:
         
     # 使用短信验证码进行登录，需要绕过 cf.aliyun.com 的滑动验证码
     def login(self, phone):
+        pass
+
+    # 运行
+    def run(self):
         pass
 
 if __name__ == '__main__':
