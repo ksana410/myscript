@@ -43,8 +43,7 @@ class polytAuto:
             if response.json()['success']:
                 return response.json()
             else:
-                print(response.json()['errors'])
-                return None
+                raise Exception(response.json()['error'])
         except Exception as e:
             print(e)
             if retry_count > 0:
@@ -60,7 +59,10 @@ class polytAuto:
         try:
             response = self.session.post(url, json = json_data)
             response.raise_for_status()
-            return response.json()
+            if response.json()['success']:
+                return response.json()
+            else:
+                raise Exception(response.json()['error'])
         except Exception as e:
             print(e)
             if retry_count > 0:
@@ -76,7 +78,10 @@ class polytAuto:
         try:
             response = self.session.delete(url, json = json_data)
             response.raise_for_status()
-            return response.json()
+            if response.json()['success']:
+                return response.json()
+            else:
+                raise Exception(response.json()['error'])
         except Exception as e:
             print(e)
             if retry_count > 0:
@@ -108,12 +113,43 @@ class polytAuto:
     # 管理观演人信息，增加，选择或者删除
     def manage_viewers(self, operate = 'select'):
         viewers_list = self._get(self.url + 'member/viewers')['data']
-        viewers_dict = dict(zip(range(len(viewers_list)), [ i['name'] for i in viewers_list]))
+        viewers_dict = dict(zip([str(i) for i in range(len(viewers_list))], [ i['name'] for i in viewers_list]))
         if operate == 'select':
             pprint(viewers_dict)
             # 选择观演人，逐个选择，直到按下回车结束，如果输入的序号不存在，则输出重试信息
+            viewers_selected = []
+            viewers_can_sel = list(viewers_dict.keys())
             while 1:
-
+                viewers_index = input(f'请在如下列表中选择观演人序号{viewers_can_sel}，按回车结束')
+                if viewers_index not in viewers_dict.keys() and viewers_index != '':
+                    print(f'{viewers_index}不存在，请重新输入')
+                    continue
+                elif viewers_index not in viewers_selected and viewers_index != '':
+                    viewers_selected.append(viewers_index)
+                    viewers_can_sel.remove(viewers_index)
+                    if len(viewers_can_sel) == 0:
+                        break
+                    continue
+                elif viewers_index in viewers_selected:
+                    print(f'{viewers_index}已被选择')
+                    continue
+                else:
+                    break
+            return [viewers_list[int(index)]['id'] for index in viewers_selected]
+        elif operate == 'add':
+            id = upper(input('请输入观演人身份证号：'))
+            if re.match(r'[1-9]/d{5}[12][09][0-9]{2}[12][0-9]{3}[01][0-9][03]/d{4}[0-9X]', id):
+                for viewer in viewers_list:
+                    if viewer['credentialsCode'] == id:
+                        print(f'{viewer["name"]}已被添加')
+                        return
+                name = input('请输入观演人姓名：')
+                add_viewer = self._post(self.url + 'member/viewers', json = {"credentialsCode": id, "cardTypeEnum": "ID_CERT","name": name, "id": "", "top": 0})
+                if add_viewer['success']:
+                    print(f'{name}已添加')
+            else:
+                print('身份证号格式错误')
+                self.manage_viewers('add')
         
     # 使用短信验证码进行登录，需要绕过 cf.aliyun.com 的滑动验证码
     def login(self, phone):
