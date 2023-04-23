@@ -46,7 +46,7 @@ class polytAuto:
             if response.json()['success']:
                 return response.json()
             else:
-                raise Exception(response.json()['error'])
+                raise Exception(response.json()['errors'])
         except Exception as e:
             print(e)
             if retry_count > 0:
@@ -65,7 +65,7 @@ class polytAuto:
             if response.json()['success']:
                 return response.json()
             else:
-                raise Exception(response.json()['error'])
+                raise Exception(response.json()['errors'])
         except Exception as e:
             print(e)
             if retry_count > 0:
@@ -84,7 +84,7 @@ class polytAuto:
             if response.json()['success']:
                 return response.json()
             else:
-                raise Exception(response.json()['error'])
+                raise Exception(response.json()['errors'])
         except Exception as e:
             print(e)
             if retry_count > 0:
@@ -165,7 +165,7 @@ class polytAuto:
             viewers_selected = self.manage_viewers('select')
             pass
         else:
-            return [ (i['name'],i['credentialsCode']) for i in viewers_list ]
+            return [ i['name'] + ':' + i['credentialsCode'] for i in viewers_list ]
         
     # 使用短信验证码进行登录，需要绕过 cf.aliyun.com 的滑动验证码
     def login(self, phone):
