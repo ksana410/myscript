@@ -36,63 +36,86 @@ class polytAuto:
         self.url = 'https://m.polyt.cn/platform-backend/'
         self.session = requests.session()
         self.session.headers.update(header)
+        self.retry_count = 3
         
-    # 建立get操作，如果失败则重试三次，三次重试失败后终止函数
-    def _get(self, url: str):
-        retry_count = 3
-        try:
-            response = self.session.get(url)
-            response.raise_for_status()
-            if response.json()['success']:
-                return response.json()
-            else:
-                raise Exception(response.json()['errors'])
-        except Exception as e:
-            print(e)
-            if retry_count > 0:
-                retry_count -= 1
-                return self._get(url)
-            else:
-                print("重试失败，程序终止！")
-                exit()
+    # # 建立get操作，如果失败则重试三次，三次重试失败后终止函数
+    # def _get(self, url: str):
+    #     retry_count = 3
+    #     try:
+    #         response = self.session.get(url)
+    #         response.raise_for_status()
+    #         if response.json()['success']:
+    #             return response.json()
+    #         else:
+    #             raise Exception(response.json()['errors'])
+    #     except Exception as e:
+    #         print(e)
+    #         if retry_count > 0:
+    #             retry_count -= 1
+    #             return self._get(url)
+    #         else:
+    #             print("重试失败，程序终止！")
+    #             exit()
     
-    # 建立post操作，三次请求失败则退出程序
-    def _post(self, url: str, json_data: dict):
-        retry_count = 3
-        try:
-            response = self.session.post(url, json = json_data)
-            response.raise_for_status()
-            if response.json()['success']:
-                return response.json()
-            else:
-                raise Exception(response.json()['errors'])
-        except Exception as e:
-            print(e)
-            if retry_count > 0:
-                retry_count -= 1
-                return self._post(url, json_data)
-            else:
-                print("重试失败，程序终止！")
-                exit()
+    # # 建立post操作，三次请求失败则退出程序
+    # def _post(self, url: str, json_data: dict):
+    #     retry_count = 3
+    #     try:
+    #         response = self.session.post(url, json = json_data)
+    #         response.raise_for_status()
+    #         if response.json()['success']:
+    #             return response.json()
+    #         else:
+    #             raise Exception(response.json()['errors'])
+    #     except Exception as e:
+    #         print(e)
+    #         if retry_count > 0:
+    #             retry_count -= 1
+    #             return self._post(url, json_data)
+    #         else:
+    #             print("重试失败，程序终止！")
+    #             exit()
     
-    # 建立delete操作，三次重试失败即退出
-    def _delete(self, url: str, json_data: dict):
-        retry_count = 3
+    # # 建立delete操作，三次重试失败即退出
+    # def _delete(self, url: str, json_data: dict):
+    #     retry_count = 3
+    #     try:
+    #         response = self.session.delete(url, json = json_data)
+    #         response.raise_for_status()
+    #         if response.json()['success']:
+    #             return response.json()
+    #         else:
+    #             raise Exception(response.json()['errors'])
+    #     except Exception as e:
+    #         print(e)
+    #         if retry_count > 0:
+    #             retry_count -= 1
+    #             return self._delete(url, json_data)
+    #         else:
+    #             print("重试失败，程序终止！")
+    #             exit()
+    
+    # 合并 get, post, delete 功能，使用一个方法实现三种功能
+    def _req(self, method: str, url: str, json_data: dict = {}):
         try:
-            response = self.session.delete(url, json = json_data)
-            response.raise_for_status()
-            if response.json()['success']:
-                return response.json()
+            if method == 'get':
+                rep = self.session.get(url)
+            elif method == 'post':
+                rep = self.session.post(url, json = json_data)
+            elif method == 'delete':
+                rep = self.session.delete(url, json = json_data)
             else:
-                raise Exception(response.json()['errors'])
-        except Exception as e:
-            print(e)
-            if retry_count > 0:
-                retry_count -= 1
-                return self._delete(url, json_data)
-            else:
-                print("重试失败，程序终止！")
+                print('method error')
                 exit()
+            rep.raise_for_status()
+            if rep.json()['success']:
+                return rep.json()
+            else:
+                raise Exception(rep.json()['errors'])
+        except  Exception as e:
+            print(e)
+            exit()
+
                 
     # 关闭连接
     def _close(self):
@@ -100,7 +123,7 @@ class polytAuto:
         
     # 获取演出时间，票价
     def get_time_price(self):
-        data = self._post(self.url + 'good/search-products-data', {'keyword': self.keyword})
+        data = self._req('post', self.url + 'good/search-products-data', {'keyword': self.keyword})
         if data['success']:
             records = data['data']['records']
             productId = None
@@ -109,9 +132,10 @@ class polytAuto:
                     productId = record['productId']
                     break
             if productId:
-                productDetail = self._get(self.url + 'good/shows/' + productId)
+                productDetail = self._req('get', self.url + 'good/shows/' + productId) 
                 DetailList = productDetail['data']['showInfoDetailList']
-                pprint(DetailList)
+                show_dict = dict(zip(range(len(DetailList)), [j['showTime'] for j in DetailList]))
+                
 
     # 选定演出的场次和票价
     def select_time_price(self):
@@ -119,7 +143,7 @@ class polytAuto:
     
     # 管理观演人信息，增加，选择或者删除
     def manage_viewers(self, operate = 'list'):
-        viewers_list = self._get(self.url + 'member/viewers')['data']
+        viewers_list = self._req('get', self.url + 'member/viewers')['data'] 
         viewers_dict = dict(zip([str(i) for i in range(len(viewers_list))], [ i['name'] for i in viewers_list]))
         if operate == 'select':
             pprint(viewers_dict)
@@ -153,11 +177,11 @@ class polytAuto:
                         print(f'{viewer["name"]}已被添加')
                         return
                 name = input('请输入观演人姓名：')
-                add_viewer = self._post(self.url + 'member/viewers', {"credentialsCode": id, "cardTypeEnum": "ID_CERT","name": name, "id": "", "top": 0})
+                add_viewer = self._req('post', self.url + 'member/viewers', {"credentialsCode": id, "cardTypeEnum": "ID_CERT","name": name, "id": "", "top": 0})
                 if add_viewer['success']:
                     print(f'{name}已添加')
             else:
-                print('身份证号格式错误')
+                print('身份证号格式错误!\n')
                 self.manage_viewers('add')
         # 删除观演人，选择删除
         elif operate == 'delete':
@@ -178,4 +202,3 @@ class polytAuto:
 if __name__ == '__main__':
     start = polytAuto("白夜行", "无锡")
     pprint(start.get_time_price())
-    pprint(start.manage_viewers())
