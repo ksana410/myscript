@@ -135,6 +135,7 @@ class polytAuto:
                 productDetail = self._req('get', self.url + 'good/shows/' + productId) 
                 DetailList = productDetail['data']['showInfoDetailList']
                 show_dict = dict(zip(range(len(DetailList)), [j['showTime'] for j in DetailList]))
+                show_detail = {}
                 
 
     # 选定演出的场次和票价
