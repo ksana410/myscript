@@ -8,7 +8,7 @@ import time
 import json
 import re
 import userdata
-import asyncio
+import 
 
 
 cookie = userdata.cookie
@@ -136,6 +136,10 @@ class polytAuto:
                 DetailList = productDetail['data']['showInfoDetailList']
                 show_dict = dict(zip(range(len(DetailList)), [j['showTime'] for j in DetailList]))
                 show_detail = {}
+                # 获取演出时间和票价-ID相关的信息
+                for k, v in show_dict.items():
+                    show_detail[v] = { str(i['price']): i['priceId'] for i in DetailList[k]['ticketPriceList'] if i['ticketCount'] != 0}
+                return show_detail
                 
 
     # 选定演出的场次和票价
