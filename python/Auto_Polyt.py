@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# 基于协程来运行程序
+# 使用多线程来运行程序
 
 import requests
 from pprint import pprint
@@ -8,7 +8,7 @@ import time
 import json
 import re
 import userdata
-import 
+import threading
 
 
 cookie = userdata.cookie
@@ -121,7 +121,7 @@ class polytAuto:
     def _close(self):
         self.session.close()
         
-    # 获取演出时间，票价
+    # 获取演出时间，票价，此处需要注意，获取到的priductId也需要一并输出，后续的操作需要使用到
     def get_time_price(self):
         data = self._req('post', self.url + 'good/search-products-data', {'keyword': self.keyword})
         if data['success']:
@@ -144,7 +144,19 @@ class polytAuto:
 
     # 选定演出的场次和票价
     def select_time_price(self):
-        pass
+        show_detail = self.get_time_price()
+        if type(show_detail) == dict:
+            time_dict = dict(enumerate(show_detail.keys(), 0))
+        while 1:
+            time_sel = int(input(f'从以下场次编号{time_dict}中选出需要的演出场次'))
+            if time_sel not in time_dict.keys():
+                print('输入的场次编号不存在，请重试！')
+            else:
+                break
+        price_dict = show_detail.get(time_dict.get(time_sel))
+        print(price_dict)
+        
+
     
     # 管理观演人信息，增加，选择或者删除
     def manage_viewers(self, operate = 'list'):
@@ -207,3 +219,4 @@ class polytAuto:
 if __name__ == '__main__':
     start = polytAuto("白夜行", "无锡")
     pprint(start.get_time_price())
+    pprint(start.select_time_price())
