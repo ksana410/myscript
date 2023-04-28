@@ -2,6 +2,7 @@
 
 # 使用多线程来运行程序
 
+from typing import Any
 import requests
 from pprint import pprint
 import time
@@ -134,27 +135,57 @@ class polytAuto:
             if productId:
                 productDetail = self._req('get', self.url + 'good/shows/' + productId) 
                 DetailList = productDetail['data']['showInfoDetailList']
-                show_dict = dict(zip(range(len(DetailList)), [j['showTime'] for j in DetailList]))
-                show_detail = {}
-                # 获取演出时间和票价-ID相关的信息
-                for k, v in show_dict.items():
-                    show_detail[v] = { str(i['price']): i['priceId'] for i in DetailList[k]['ticketPriceList'] if i['ticketCount'] != 0}
-                return show_detail
+                show_details = {}
+                # 获取演出时间和票价-此处需要输出 productId，showId，sectionId，后续都要使用到，所以最终还是需要使用json输出
+                for detail in DetailList:
+                    show_details[detail['showTime']] = {
+                        'productId': productId,
+                        'showId': detail['showId'],
+                        'sectionId': detail['sectionId'],
+                        'price': {
+                            str(i['price']): i['priceId'] for i in detail['ticketPriceList'] if i['ticketCount'] != 0
+                        }
+                    }
+                return show_details
                 
 
     # 选定演出的场次和票价
     def select_time_price(self):
-        show_detail = self.get_time_price()
-        if type(show_detail) == dict:
-            time_dict = dict(enumerate(show_detail.keys(), 0))
-        while 1:
-            time_sel = int(input(f'从以下场次编号{time_dict}中选出需要的演出场次'))
-            if time_sel not in time_dict.keys():
-                print('输入的场次编号不存在，请重试！')
-            else:
-                break
-        price_dict = show_detail.get(time_dict.get(time_sel))
-        print(price_dict)
+        time_list = []
+        time_index: str = ''
+        show_details = self.get_time_price()
+        if type(show_details) == dict and len(show_details) > 0:
+            time_list = list(show_details.keys())
+        try:
+            for index, key in enumerate(time_list):
+                print(f'{index} {key}')
+            while 1:
+                time_index = input('请在上述列表中选择所需场次的序号，按回车继续： ')
+                if int(time_index) not in range(len(time_list)):
+                    print('输入的场次序号不存在，请重试！')
+                    continue
+                else:
+                    break
+            show_time: dict = show_details[time_list[int(time_index)]]['price']
+            for index, key in enumerate(show_time.keys()):
+                print(f'{index} {key}')
+            while 1:
+                price_index = input('请选择价格编号： ')
+                if int(price_index) not in range(len(show_time)):
+                    print('输入的序号错误，请重试！')
+                    continue
+                else:
+                    break
+        except Exception as e:
+            print(e)
+            exit()
+        sel_info = {
+            'productId': show_details[time_list[int(time_index)]]['productId'],
+            'showId': show_details[time_list[int(time_index)]]['showId'],
+            'sectionId': show_details[time_list[int(time_index)]]['sectionId'],
+            'priceId': show_time[list(show_time.keys())[int(price_index)]]
+        }
+        return sel_info
         
 
     
@@ -208,6 +239,10 @@ class polytAuto:
         else:
             return [ i['name'] + ':' + i['credentialsCode'] for i in viewers_list ]
         
+    # 选座
+    def get_seat(self, seat_info):
+        pass
+    
     # 使用短信验证码进行登录，需要绕过 cf.aliyun.com 的滑动验证码
     def login(self, phone):
         pass
